@@ -1,0 +1,28 @@
+{
+  "_help": "Your own names for things. 'sites' open in Chrome ('open gmail'); 'nicknames' point a spoken name at an installed app or a site ('open browser'). Installed apps are found by themselves; restart the assistant after editing.",
+  "sites": {
+    "youtube": "https://www.youtube.com",
+    "youtube music": "https://music.youtube.com",
+    "gmail": "https://mail.google.com",
+    "google": "https://www.google.com",
+    "google maps": "https://maps.google.com",
+    "netflix": "https://www.netflix.com",
+    "prime video": "https://www.primevideo.com",
+    "whatsapp": "https://web.whatsapp.com",
+    "chat gpt": "https://chatgpt.com",
+    "weather": "https://www.google.com/search?q=weather"
+  },
+  "nicknames": {
+    "browser": "google chrome",
+    "chrome": "google chrome",
+    "edge": "microsoft edge",
+    "files": "file explorer",
+    "explorer": "file explorer",
+    "my files": "file explorer",
+    "maps": "google maps",
+    "mail": "gmail",
+    "email": "gmail",
+    "terminal": "windows terminal",
+    "store": "microsoft store"
+  }
+}
