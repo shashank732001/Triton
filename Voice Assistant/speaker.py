@@ -150,6 +150,7 @@ class Speaker:
         self._stop = threading.Event()
         self._idle = threading.Event()
         self._idle.set()
+        self.stopped_at = 0.0        # time.monotonic() when the last reply ended
         self._cache = {}             # short phrases already made (text -> audio), played without waiting
         self._out, self._out_rate = None, 0
         threading.Thread(target=self._run, name="speaker", daemon=True).start()
@@ -212,6 +213,11 @@ class Speaker:
     def speaking(self):
         return not self._idle.is_set()
 
+    @property
+    def quiet_for(self):
+        """Seconds since Triton last stopped talking (0 while talking; large if it never has)."""
+        return 0.0 if self.speaking else time.monotonic() - self.stopped_at
+
     def wait(self, timeout=30):
         return self._idle.wait(timeout)
 
@@ -236,6 +242,7 @@ class Speaker:
                 done.set()
                 started.set()
                 if self._jobs.empty():
+                    self.stopped_at = time.monotonic()
                     self._idle.set()
 
     def _sentences(self, text):

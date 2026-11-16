@@ -266,6 +266,10 @@ class Overlay:
         """success: understood or not; text: what to show, e.g. "Open Chrome"."""
         self._cmds.put(("ok" if success else "fail", text))
 
+    def hide(self):
+        """Fade out quietly, no verdict (a wake-up with nothing said after it: most likely a false one)."""
+        self._cmds.put(("hide", None))
+
     # ---------- overlay thread ----------
 
     def _run(self):
@@ -303,6 +307,8 @@ class Overlay:
             elif cmd in ("ok", "fail") and state != "hidden":
                 state, state_at = cmd, time.monotonic()
                 text = (arg or ("Got it" if cmd == "ok" else "Didn't catch that"))[:44]
+            elif cmd == "hide" and state not in ("hidden", "gone"):
+                state, state_at = "gone", time.monotonic()
             if state == "hidden":
                 continue
 
@@ -332,8 +338,11 @@ class Overlay:
                 fade = max(0.0, age - FAIL_HOLD_SEC) / FADE_SEC
                 grow = (1 - 0.35 * _ease_out(age / 0.4)) * (1 - 0.6 * _ease_out(fade))
                 alpha = 1 - _ease_out(fade)
+            elif state == "gone":
+                fade = age / FADE_SEC
+                alpha, grow = 1 - _ease_out(fade), 1 - 0.6 * _ease_out(fade)
 
-            if alpha <= 0.0 and state in ("ok", "fail"):
+            if alpha <= 0.0 and state in ("ok", "fail", "gone"):
                 state = "hidden"
                 user32.ShowWindow(self.hwnd, SW_HIDE)
                 self._visible = False
