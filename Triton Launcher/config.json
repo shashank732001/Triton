@@ -1,0 +1,22 @@
+{
+  "name": "",
+  "city": "",
+  "country": "",
+  "temperatureUnit": "celsius",
+  "clock24h": true,
+  "useDeviceLocation": true,
+  "wallpaper": "auto",
+  "shuffleWallpapers": false,
+  "livePalette": "aurora",
+  "ambientAfterSeconds": 120,
+  "lowPower": false,
+  "voiceAssistant": true,
+  "screenShare": true,
+  "debug": false,
+  "apps": [
+    { "id": "files",    "name": "Files",    "path": "explorer.exe", "args": "" },
+    { "id": "chrome",   "name": "Chrome",   "path": "chrome.exe",   "args": "" },
+    { "id": "brave",    "name": "Brave",    "path": "brave.exe",    "args": "" },
+    { "id": "settings", "name": "Settings", "path": "ms-settings:", "args": "" }
+  ]
+}
