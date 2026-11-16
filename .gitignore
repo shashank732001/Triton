@@ -1,0 +1,34 @@
+# Builds and packaged output (made by build.ps1 / build-voice.ps1 / build.bat)
+Triton Launcher/dist/
+Triton Launcher/voice-build/
+Triton Launcher/src/bin/
+Triton Launcher/src/obj/
+Triton Screen Share/build/
+Triton Screen Share/dist/
+# Downloaded by build.bat from vb-audio.com
+Triton Screen Share/third_party/vbcable/
+
+# Python and editor files
+.venv/
+__pycache__/
+*.pyc
+.idea/
+*.lnk
+
+# Models and training output: large, downloaded or trained (see the READMEs)
+Voice Assistant/models/
+Voice Assistant/training_out/
+
+# Private: settings hold the laptop big brain's key; recordings of your voice; logs and conversations
+Voice Assistant/settings*.json*
+Voice Assistant/big_brain.json
+Voice Assistant/voice_samples/
+Voice Assistant/n95 commands/
+Voice Assistant/debug_clips/
+Voice Assistant/logs/
+Voice Assistant/live.jsonl
+*.log
+
+# Benchmark output and audio (re-made by the bench scripts)
+Voice Assistant/bench/results/
+Voice Assistant/bench/stt_audio/
