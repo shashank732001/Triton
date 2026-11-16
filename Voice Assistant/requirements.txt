@@ -1,0 +1,25 @@
+openwakeword
+onnxruntime
+vosk
+sounddevice
+pystray
+pillow
+numpy
+winrt-Windows.Media.Control
+winrt-Windows.Foundation
+winrt-Windows.Foundation.Collections
+# the brain (local model + on-screen control)
+# pinned: newer comtypes has broken pywinauto before (these work on Windows 10/11 22H2+)
+pywinauto==0.6.9
+comtypes==1.4.17
+psutil
+requests
+huggingface_hub
+# the voice (text-to-speech; voices go in models/piper)
+piper-tts
+# better ears (open-vocabulary speech-to-text; models in models/stt or TritonModels/stt)
+sherpa-onnx
+# echo cancellation (WebRTC AEC3) with what the speaker plays as reference (echo.py)
+livekit
+soundcard
+moonshine-voice==0.1.5
