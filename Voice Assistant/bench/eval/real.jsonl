@@ -1,0 +1,49 @@
+{"id": "real-001", "text": "Open Chrome", "screen": "", "expect": "act", "expected": [{"tool": "open", "args": {"target": "chrome"}}]}
+{"id": "real-002", "text": "open crome", "screen": "", "expect": "act", "expected": [{"tool": "open", "args": {"target": "chrome"}}]}
+{"id": "real-003", "text": "Bring chrome on top", "screen": "", "expect": "act", "expected": [{"tool": "switch_to", "args": {"target": "chrome"}}], "also_ok": [[{"tool": "window", "args": {"action": "maximize", "target": "chrome"}}]]}
+{"id": "real-004", "text": "Bring clumps forward", "screen": "", "expect": "repeat"}
+{"id": "real-005", "text": "Close this tab", "screen": "Netflix - Google Chrome", "expect": "act", "expected": [{"tool": "browser", "args": {"action": "close_tab"}}]}
+{"id": "real-006", "text": "close the current window", "screen": "Netflix - Google Chrome", "expect": "act", "expected": [{"tool": "close", "args": {}}]}
+{"id": "real-007", "text": "Close the strap", "screen": "Netflix - Google Chrome", "expect": "repeat", "also_ok_forms": ["act:close"]}
+{"id": "real-008", "text": "Open YouTube", "screen": "", "expect": "act", "expected": [{"tool": "open", "args": {"target": "youtube"}}]}
+{"id": "real-009", "text": "Open you took", "screen": "", "expect": "act", "expected": [{"tool": "open", "args": {"target": "youtube"}}], "also_ok_forms": ["repeat"]}
+{"id": "real-010", "text": "Open Netflix on Chrome", "screen": "", "expect": "act", "expected": [{"tool": "open", "args": {"target": "netflix"}}]}
+{"id": "real-011", "text": "Open Netflix and search for Broccoli 99 in that", "screen": "", "expect": "act", "expected": [{"tool": "open", "args": {"target": "netflix"}}, {"tool": "web_search", "args": {"query": "Brooklyn 99"}}]}
+{"id": "real-012", "text": "Search for Brooklyn99 on Netflix now", "screen": "Netflix - Google Chrome", "expect": "act", "expected": [{"tool": "web_search", "args": {"query": "Brooklyn 99"}}]}
+{"id": "real-013", "text": "find me brooklyn nine nine in here", "screen": "Netflix - Google Chrome | on screen: Home, Search, My List, Shashank, Kids", "expect": "act", "expected": [{"tool": "web_search", "args": {"query": "brooklyn nine nine"}}]}
+{"id": "real-014", "text": "Open the Netflix and select Shashant", "screen": "", "expect": "act", "expected": [{"tool": "open", "args": {"target": "netflix"}}, {"tool": "click", "args": {"target": "Shashank"}}], "also_ok": [[{"tool": "open", "args": {"target": "netflix"}}, {"tool": "click", "args": {"target": "Shashant"}}]]}
+{"id": "real-015", "text": "pick the shashant one", "screen": "Netflix - Google Chrome | on screen: Home, Search, My List, Shashank, Kids", "expect": "act", "expected": [{"tool": "click", "args": {"target": "Shashank"}}]}
+{"id": "real-016", "text": "Can you select the first profile here", "screen": "Netflix - Google Chrome | on screen: Who's watching?, Shashank, Shamitha K shetty, Kids", "expect": "act", "expected": [{"tool": "click", "args": {"target": "Shashank"}}]}
+{"id": "real-017", "text": "Click on the shorts button on screen", "screen": "YouTube - Google Chrome | on screen: Home, Shorts, Subscriptions, You, Search", "expect": "act", "expected": [{"tool": "click", "args": {"target": "Shorts"}}]}
+{"id": "real-018", "text": "look for lofi beats here", "screen": "YouTube - Google Chrome | on screen: Search", "expect": "act", "expected": [{"tool": "web_search", "args": {"query": "lofi beats"}}], "also_ok": [[{"tool": "youtube_search", "args": {"query": "lofi beats"}}]]}
+{"id": "real-019", "text": "Search for cat videos on the screen", "screen": "YouTube - Google Chrome | on screen: Search", "expect": "act", "expected": [{"tool": "web_search", "args": {"query": "cat videos"}}], "also_ok": [[{"tool": "youtube_search", "args": {"query": "cat videos"}}]]}
+{"id": "real-020", "text": "can you type LinkedIn here on the search bar", "screen": "Google - Google Chrome | on screen: Search", "expect": "act", "expected": [{"tool": "click", "args": {"target": "Search"}}, {"tool": "type_text", "args": {"text": "LinkedIn"}}], "also_ok": [[{"tool": "type_text", "args": {"text": "LinkedIn"}}], [{"tool": "web_search", "args": {"query": "LinkedIn"}}]]}
+{"id": "real-021", "text": "now click on the search icon and then i click", "screen": "Netflix - Google Chrome | on screen: Home, Search, My List, Shashank, Kids", "expect": "act", "expected": [{"tool": "click", "args": {"target": "Search"}}], "also_ok_forms": ["repeat"]}
+{"id": "real-022", "text": "Just Netflix Search it", "screen": "netflix - Google Search - Google Chrome", "expect": "act", "expected": [{"tool": "click", "args": {"target": "Netflix"}}], "also_ok_forms": ["repeat"]}
+{"id": "real-023", "text": "bring up spotify and skip to the next song", "screen": "", "expect": "act", "expected": [{"tool": "open", "args": {"target": "spotify"}}, {"tool": "media", "args": {"action": "next"}}]}
+{"id": "real-024", "text": "Show my laptop here", "screen": "", "expect": "act", "expected": [{"tool": "screen_share", "args": {"action": "mirror"}}]}
+{"id": "real-025", "text": "Mr Meera my laptop", "screen": "Netflix - Google Chrome", "expect": "act", "expected": [{"tool": "screen_share", "args": {"action": "mirror"}}], "also_ok_forms": ["repeat"]}
+{"id": "real-026", "text": "Switch to extend more", "screen": "", "expect": "act", "expected": [{"tool": "screen_share", "args": {"action": "extend"}}]}
+{"id": "real-027", "text": "Switch back to mirror mode", "screen": "", "expect": "act", "expected": [{"tool": "screen_share", "args": {"action": "mirror"}}]}
+{"id": "real-028", "text": "Stop sharing my laptop here", "screen": "", "expect": "act", "expected": [{"tool": "screen_share", "args": {"action": "stop"}}]}
+{"id": "real-029", "text": "Stop filming", "screen": "", "expect": "act", "expected": [{"tool": "screen_share", "args": {"action": "camera_off"}}], "also_ok_forms": ["repeat"]}
+{"id": "real-030", "text": "Shut up", "screen": "", "expect": "act", "expected": [{"tool": "cancel", "args": {}}], "also_ok_forms": ["snooze"]}
+{"id": "real-031", "text": "That's all Triton", "screen": "", "expect": "act", "expected": [{"tool": "cancel", "args": {}}]}
+{"id": "real-032", "text": "Wait Raten can you stop the assistant running here", "screen": "", "expect": "act", "expected": [{"tool": "cancel", "args": {}}], "also_ok_forms": ["say", "repeat"], "never": ["power"]}
+{"id": "real-033", "text": "No could the Triton assistant running here", "screen": "", "expect": "repeat", "also_ok_forms": ["say"], "never": ["power", "info"]}
+{"id": "real-034", "text": "hey how are you doing", "screen": "Triton Launcher", "expect": "say"}
+{"id": "real-035", "text": "how does a rainbow form", "screen": "", "expect": "say"}
+{"id": "real-036", "text": "Where is Nikki", "screen": "", "expect": "repeat", "also_ok_forms": ["say"]}
+{"id": "real-037", "text": "He might actually be going super saiyan to this song", "screen": "YouTube - Google Chrome", "expect": "repeat", "also_ok_forms": ["say"]}
+{"id": "real-038", "text": "The Groomsman tradition is the roasted room and then you say nice things about the bride", "screen": "YouTube - Google Chrome", "expect": "repeat", "also_ok_forms": ["say"]}
+{"id": "real-039", "text": "be that Like it's your manufacturing mind", "screen": "", "expect": "repeat"}
+{"id": "real-040", "text": "She wanted to put anything on", "screen": "", "expect": "repeat"}
+{"id": "real-041", "text": "Open it", "screen": "", "expect": "repeat", "also_ok_forms": ["say"]}
+{"id": "real-042", "text": "Do it", "screen": "", "expect": "repeat", "also_ok_forms": ["say"]}
+{"id": "real-043", "text": "Hydrated", "screen": "", "expect": "repeat"}
+{"id": "real-044", "text": "what time is it", "screen": "", "expect": "act", "expected": [{"tool": "info", "args": {"what": "time"}}]}
+{"id": "real-045", "text": "and germany?", "screen": "", "history": [{"user": "what's the capital of france", "reply": "Paris."}], "expect": "say"}
+{"id": "real-046", "text": "play some lofi on youtube music", "screen": "", "expect": "act", "expected": [{"tool": "open", "args": {"target": "youtube music"}}, {"tool": "web_search", "args": {"query": "lofi"}}]}
+{"id": "real-047", "text": "pause it", "screen": "YouTube Music - Google Chrome", "expect": "act", "expected": [{"tool": "media", "args": {"action": "pause"}}]}
+{"id": "real-048", "text": "go back", "screen": "Netflix - Google Chrome", "expect": "act", "expected": [{"tool": "browser", "args": {"action": "back"}}]}
+{"id": "real-049", "text": "turn on my laptop's camera here", "screen": "", "expect": "act", "expected": [{"tool": "screen_share", "args": {"action": "camera_on"}}]}

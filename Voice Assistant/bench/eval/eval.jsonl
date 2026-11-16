@@ -1,0 +1,229 @@
+{"id": "volume-001", "category": "volume", "text": "set the volume to 60", "expected": [{"tool": "set_volume", "args": {"level": 60}}], "also_ok": []}
+{"id": "volume-002", "category": "volume", "text": "volume 30 percent", "expected": [{"tool": "set_volume", "args": {"level": 30}}], "also_ok": []}
+{"id": "volume-003", "category": "volume", "text": "put the sound at 40", "expected": [{"tool": "set_volume", "args": {"level": 40}}], "also_ok": []}
+{"id": "volume-004", "category": "volume", "text": "make the volume 90%", "expected": [{"tool": "set_volume", "args": {"level": 90}}], "also_ok": []}
+{"id": "volume-005", "category": "volume", "text": "change the volume to 10 please", "expected": [{"tool": "set_volume", "args": {"level": 10}}], "also_ok": []}
+{"id": "volume-006", "category": "volume", "text": "can you set volume at 15", "expected": [{"tool": "set_volume", "args": {"level": 15}}], "also_ok": []}
+{"id": "volume-007", "category": "volume", "text": "volume up", "expected": [{"tool": "change_volume", "args": {"direction": "up"}}], "also_ok": []}
+{"id": "volume-008", "category": "volume", "text": "turn it up", "expected": [{"tool": "change_volume", "args": {"direction": "up"}}], "also_ok": []}
+{"id": "volume-009", "category": "volume", "text": "louder please", "expected": [{"tool": "change_volume", "args": {"direction": "up"}}], "also_ok": []}
+{"id": "volume-010", "category": "volume", "text": "increase the volume", "expected": [{"tool": "change_volume", "args": {"direction": "up"}}], "also_ok": []}
+{"id": "volume-011", "category": "volume", "text": "crank it up a bit", "expected": [{"tool": "change_volume", "args": {"direction": "up"}}], "also_ok": []}
+{"id": "volume-012", "category": "volume", "text": "i can't hear it", "expected": [{"tool": "change_volume", "args": {"direction": "up"}}], "also_ok": []}
+{"id": "volume-013", "category": "volume", "text": "turn the volume down", "expected": [{"tool": "change_volume", "args": {"direction": "down"}}], "also_ok": []}
+{"id": "volume-014", "category": "volume", "text": "quieter", "expected": [{"tool": "change_volume", "args": {"direction": "down"}}], "also_ok": []}
+{"id": "volume-015", "category": "volume", "text": "lower the sound a little", "expected": [{"tool": "change_volume", "args": {"direction": "down"}}], "also_ok": []}
+{"id": "volume-016", "category": "volume", "text": "turn it down", "expected": [{"tool": "change_volume", "args": {"direction": "down"}}], "also_ok": []}
+{"id": "volume-017", "category": "volume", "text": "it's too loud", "expected": [{"tool": "change_volume", "args": {"direction": "down"}}], "also_ok": []}
+{"id": "volume-018", "category": "volume", "text": "turn the volume up by 35", "expected": [{"tool": "change_volume", "args": {"direction": "up", "amount": 35}}], "also_ok": []}
+{"id": "volume-019", "category": "volume", "text": "lower the volume by 25 percent", "expected": [{"tool": "change_volume", "args": {"direction": "down", "amount": 25}}], "also_ok": []}
+{"id": "volume-020", "category": "volume", "text": "raise it by 5", "expected": [{"tool": "change_volume", "args": {"direction": "up", "amount": 5}}], "also_ok": []}
+{"id": "volume-021", "category": "volume", "text": "decrease volume by 15", "expected": [{"tool": "change_volume", "args": {"direction": "down", "amount": 15}}], "also_ok": []}
+{"id": "volume-022", "category": "volume", "text": "max volume", "expected": [{"tool": "set_volume", "args": {"level": 100}}], "also_ok": []}
+{"id": "volume-023", "category": "volume", "text": "full volume please", "expected": [{"tool": "set_volume", "args": {"level": 100}}], "also_ok": []}
+{"id": "volume-024", "category": "volume", "text": "mute", "expected": [{"tool": "mute", "args": {}}], "also_ok": []}
+{"id": "volume-025", "category": "volume", "text": "silence", "expected": [{"tool": "mute", "args": {}}], "also_ok": []}
+{"id": "volume-026", "category": "volume", "text": "mute the tv", "expected": [{"tool": "mute", "args": {}}], "also_ok": []}
+{"id": "volume-027", "category": "volume", "text": "kill the sound", "expected": [{"tool": "mute", "args": {}}], "also_ok": []}
+{"id": "volume-028", "category": "volume", "text": "unmute", "expected": [{"tool": "unmute", "args": {}}], "also_ok": []}
+{"id": "volume-029", "category": "volume", "text": "sound back on", "expected": [{"tool": "unmute", "args": {}}], "also_ok": []}
+{"id": "volume-030", "category": "volume", "text": "turn the sound on again", "expected": [{"tool": "unmute", "args": {}}], "also_ok": []}
+{"id": "media-001", "category": "media", "text": "play", "expected": [{"tool": "media", "args": {"action": "play"}}], "also_ok": []}
+{"id": "media-002", "category": "media", "text": "play the music", "expected": [{"tool": "media", "args": {"action": "play"}}], "also_ok": []}
+{"id": "media-003", "category": "media", "text": "resume the video", "expected": [{"tool": "media", "args": {"action": "play"}}], "also_ok": []}
+{"id": "media-004", "category": "media", "text": "continue playing", "expected": [{"tool": "media", "args": {"action": "play"}}], "also_ok": []}
+{"id": "media-005", "category": "media", "text": "pause", "expected": [{"tool": "media", "args": {"action": "pause"}}], "also_ok": []}
+{"id": "media-006", "category": "media", "text": "pause the video", "expected": [{"tool": "media", "args": {"action": "pause"}}], "also_ok": []}
+{"id": "media-007", "category": "media", "text": "stop the music", "expected": [{"tool": "media", "args": {"action": "pause"}}], "also_ok": []}
+{"id": "media-008", "category": "media", "text": "hold on pause it", "expected": [{"tool": "media", "args": {"action": "pause"}}], "also_ok": []}
+{"id": "media-009", "category": "media", "text": "next song", "expected": [{"tool": "media", "args": {"action": "next"}}], "also_ok": []}
+{"id": "media-010", "category": "media", "text": "skip this track", "expected": [{"tool": "media", "args": {"action": "next"}}], "also_ok": []}
+{"id": "media-011", "category": "media", "text": "play the next one", "expected": [{"tool": "media", "args": {"action": "next"}}], "also_ok": []}
+{"id": "media-012", "category": "media", "text": "skip", "expected": [{"tool": "media", "args": {"action": "next"}}], "also_ok": []}
+{"id": "media-013", "category": "media", "text": "previous song", "expected": [{"tool": "media", "args": {"action": "previous"}}], "also_ok": []}
+{"id": "media-014", "category": "media", "text": "go back a track", "expected": [{"tool": "media", "args": {"action": "previous"}}], "also_ok": []}
+{"id": "media-015", "category": "media", "text": "play the last song again", "expected": [{"tool": "media", "args": {"action": "previous"}}], "also_ok": []}
+{"id": "apps-001", "category": "apps", "text": "open prime video", "expected": [{"tool": "open", "args": {"target": ["prime video"]}}], "also_ok": []}
+{"id": "apps-002", "category": "apps", "text": "launch brave", "expected": [{"tool": "open", "args": {"target": ["brave"]}}], "also_ok": []}
+{"id": "apps-003", "category": "apps", "text": "can you open whatsapp for me", "expected": [{"tool": "open", "args": {"target": ["whatsapp"]}}], "also_ok": []}
+{"id": "apps-004", "category": "apps", "text": "open calculator", "expected": [{"tool": "open", "args": {"target": ["calculator"]}}], "also_ok": []}
+{"id": "apps-005", "category": "apps", "text": "i want to use youtube music", "expected": [{"tool": "open", "args": {"target": ["youtube music"]}}], "also_ok": []}
+{"id": "apps-006", "category": "apps", "text": "open netflix", "expected": [{"tool": "open", "args": {"target": ["netflix"]}}], "also_ok": []}
+{"id": "apps-007", "category": "apps", "text": "can you open google maps for me", "expected": [{"tool": "open", "args": {"target": ["google maps", "maps"]}}], "also_ok": []}
+{"id": "apps-008", "category": "apps", "text": "open youtube", "expected": [{"tool": "open", "args": {"target": ["youtube"]}}], "also_ok": []}
+{"id": "apps-009", "category": "apps", "text": "start gmail", "expected": [{"tool": "open", "args": {"target": ["gmail"]}}], "also_ok": []}
+{"id": "apps-010", "category": "apps", "text": "fire up word", "expected": [{"tool": "open", "args": {"target": ["word", "microsoft word"]}}], "also_ok": []}
+{"id": "apps-011", "category": "apps", "text": "i want to use paint", "expected": [{"tool": "open", "args": {"target": ["paint"]}}], "also_ok": []}
+{"id": "apps-012", "category": "apps", "text": "start settings", "expected": [{"tool": "open", "args": {"target": ["settings"]}}], "also_ok": []}
+{"id": "apps-013", "category": "apps", "text": "launch terminal", "expected": [{"tool": "open", "args": {"target": ["terminal", "windows terminal"]}}], "also_ok": []}
+{"id": "apps-014", "category": "apps", "text": "can you open prime video for me", "expected": [{"tool": "open", "args": {"target": ["prime video"]}}], "also_ok": []}
+{"id": "apps-015", "category": "apps", "text": "bring up spotify", "expected": [{"tool": "open", "args": {"target": ["spotify"]}}], "also_ok": []}
+{"id": "apps-016", "category": "apps", "text": "launch google maps", "expected": [{"tool": "open", "args": {"target": ["google maps", "maps"]}}], "also_ok": []}
+{"id": "apps-017", "category": "apps", "text": "launch notepad", "expected": [{"tool": "open", "args": {"target": ["notepad"]}}], "also_ok": []}
+{"id": "apps-018", "category": "apps", "text": "open word", "expected": [{"tool": "open", "args": {"target": ["word", "microsoft word"]}}], "also_ok": []}
+{"id": "apps-019", "category": "apps", "text": "exit spotify", "expected": [{"tool": "close", "args": {"target": ["spotify"]}}], "also_ok": []}
+{"id": "apps-020", "category": "apps", "text": "shut word", "expected": [{"tool": "close", "args": {"target": ["word", "microsoft word"]}}], "also_ok": []}
+{"id": "apps-021", "category": "apps", "text": "shut files", "expected": [{"tool": "close", "args": {"target": ["files", "file explorer", "explorer"]}}], "also_ok": []}
+{"id": "apps-022", "category": "apps", "text": "exit settings", "expected": [{"tool": "close", "args": {"target": ["settings"]}}], "also_ok": []}
+{"id": "apps-023", "category": "apps", "text": "exit calculator", "expected": [{"tool": "close", "args": {"target": ["calculator"]}}], "also_ok": []}
+{"id": "apps-024", "category": "apps", "text": "close this window", "expected": [{"tool": "close", "args": {}}], "also_ok": []}
+{"id": "apps-025", "category": "apps", "text": "close this", "expected": [{"tool": "close", "args": {}}], "also_ok": []}
+{"id": "apps-026", "category": "apps", "text": "close the app", "expected": [{"tool": "close", "args": {}}], "also_ok": []}
+{"id": "apps-027", "category": "apps", "text": "exit this program", "expected": [{"tool": "close", "args": {}}], "also_ok": []}
+{"id": "apps-028", "category": "apps", "text": "show me files", "expected": [{"tool": "switch_to", "args": {"target": ["files", "file explorer", "explorer"]}}], "also_ok": [[{"tool": "open", "args": {"target": ["files", "file explorer", "explorer"]}}]]}
+{"id": "apps-029", "category": "apps", "text": "bring notepad to the front", "expected": [{"tool": "switch_to", "args": {"target": ["notepad"]}}], "also_ok": [[{"tool": "open", "args": {"target": ["notepad"]}}]]}
+{"id": "apps-030", "category": "apps", "text": "show me youtube music", "expected": [{"tool": "switch_to", "args": {"target": ["youtube music"]}}], "also_ok": [[{"tool": "open", "args": {"target": ["youtube music"]}}]]}
+{"id": "apps-031", "category": "apps", "text": "bring edge to the front", "expected": [{"tool": "switch_to", "args": {"target": ["edge", "microsoft edge"]}}], "also_ok": [[{"tool": "open", "args": {"target": ["edge", "microsoft edge"]}}]]}
+{"id": "apps-032", "category": "apps", "text": "switch to spotify", "expected": [{"tool": "switch_to", "args": {"target": ["spotify"]}}], "also_ok": [[{"tool": "open", "args": {"target": ["spotify"]}}]]}
+{"id": "apps-033", "category": "apps", "text": "switch to settings", "expected": [{"tool": "switch_to", "args": {"target": ["settings"]}}], "also_ok": [[{"tool": "open", "args": {"target": ["settings"]}}]]}
+{"id": "apps-034", "category": "apps", "text": "minimize settings", "expected": [{"tool": "window", "args": {"action": "minimize", "target": ["settings"]}}], "also_ok": []}
+{"id": "apps-035", "category": "apps", "text": "minimize calculator", "expected": [{"tool": "window", "args": {"action": "minimize", "target": ["calculator"]}}], "also_ok": []}
+{"id": "apps-036", "category": "apps", "text": "minimize edge", "expected": [{"tool": "window", "args": {"action": "minimize", "target": ["edge", "microsoft edge"]}}], "also_ok": []}
+{"id": "apps-037", "category": "apps", "text": "make terminal full screen", "expected": [{"tool": "window", "args": {"action": "maximize", "target": ["terminal", "windows terminal"]}}], "also_ok": []}
+{"id": "apps-038", "category": "apps", "text": "make notepad full screen", "expected": [{"tool": "window", "args": {"action": "maximize", "target": ["notepad"]}}], "also_ok": []}
+{"id": "apps-039", "category": "apps", "text": "maximize edge", "expected": [{"tool": "window", "args": {"action": "maximize", "target": ["edge", "microsoft edge"]}}], "also_ok": []}
+{"id": "apps-040", "category": "apps", "text": "minimize this", "expected": [{"tool": "window", "args": {"action": "minimize"}}], "also_ok": []}
+{"id": "apps-041", "category": "apps", "text": "hide this window", "expected": [{"tool": "window", "args": {"action": "minimize"}}], "also_ok": []}
+{"id": "apps-042", "category": "apps", "text": "make it full screen", "expected": [{"tool": "window", "args": {"action": "maximize"}}], "also_ok": []}
+{"id": "apps-043", "category": "apps", "text": "maximize the window", "expected": [{"tool": "window", "args": {"action": "maximize"}}], "also_ok": []}
+{"id": "apps-044", "category": "apps", "text": "minimize everything", "expected": [{"tool": "show_desktop", "args": {}}], "also_ok": []}
+{"id": "apps-045", "category": "apps", "text": "show the desktop", "expected": [{"tool": "show_desktop", "args": {}}], "also_ok": []}
+{"id": "apps-046", "category": "apps", "text": "show me the desktop", "expected": [{"tool": "show_desktop", "args": {}}], "also_ok": []}
+{"id": "apps-047", "category": "apps", "text": "go home", "expected": [{"tool": "go_home", "args": {}}], "also_ok": []}
+{"id": "apps-048", "category": "apps", "text": "back to the home screen", "expected": [{"tool": "go_home", "args": {}}], "also_ok": []}
+{"id": "apps-049", "category": "apps", "text": "take me home", "expected": [{"tool": "go_home", "args": {}}], "also_ok": []}
+{"id": "apps-050", "category": "apps", "text": "show open apps", "expected": [{"tool": "show_open_apps", "args": {}}], "also_ok": []}
+{"id": "apps-051", "category": "apps", "text": "what apps are open", "expected": [{"tool": "show_open_apps", "args": {}}], "also_ok": []}
+{"id": "apps-052", "category": "apps", "text": "show me all the windows", "expected": [{"tool": "show_open_apps", "args": {}}], "also_ok": []}
+{"id": "browser-001", "category": "browser", "text": "new tab", "expected": [{"tool": "browser", "args": {"action": "new_tab"}}], "also_ok": []}
+{"id": "browser-002", "category": "browser", "text": "open a new tab", "expected": [{"tool": "browser", "args": {"action": "new_tab"}}], "also_ok": []}
+{"id": "browser-003", "category": "browser", "text": "close this tab", "expected": [{"tool": "browser", "args": {"action": "close_tab"}}], "also_ok": []}
+{"id": "browser-004", "category": "browser", "text": "close the tab", "expected": [{"tool": "browser", "args": {"action": "close_tab"}}], "also_ok": []}
+{"id": "browser-005", "category": "browser", "text": "go back", "expected": [{"tool": "browser", "args": {"action": "back"}}], "also_ok": []}
+{"id": "browser-006", "category": "browser", "text": "back to the previous page", "expected": [{"tool": "browser", "args": {"action": "back"}}], "also_ok": []}
+{"id": "browser-007", "category": "browser", "text": "go forward", "expected": [{"tool": "browser", "args": {"action": "forward"}}], "also_ok": []}
+{"id": "browser-008", "category": "browser", "text": "next tab", "expected": [{"tool": "browser", "args": {"action": "next_tab"}}], "also_ok": []}
+{"id": "browser-009", "category": "browser", "text": "previous tab", "expected": [{"tool": "browser", "args": {"action": "previous_tab"}}], "also_ok": []}
+{"id": "browser-010", "category": "browser", "text": "refresh the page", "expected": [{"tool": "browser", "args": {"action": "reload"}}], "also_ok": []}
+{"id": "browser-011", "category": "browser", "text": "reload", "expected": [{"tool": "browser", "args": {"action": "reload"}}], "also_ok": []}
+{"id": "web-001", "category": "web", "text": "search the web for cricket score", "expected": [{"tool": "web_search", "args": {"query": "cricket score"}}], "also_ok": []}
+{"id": "web-002", "category": "web", "text": "search the web for weather in berlin", "expected": [{"tool": "web_search", "args": {"query": "weather in berlin"}}], "also_ok": []}
+{"id": "web-003", "category": "web", "text": "search for rain sounds", "expected": [{"tool": "web_search", "args": {"query": "rain sounds"}}], "also_ok": []}
+{"id": "web-004", "category": "web", "text": "search for taylor swift", "expected": [{"tool": "web_search", "args": {"query": "taylor swift"}}], "also_ok": []}
+{"id": "web-005", "category": "web", "text": "look up best movies 2026", "expected": [{"tool": "web_search", "args": {"query": "best movies 2026"}}], "also_ok": []}
+{"id": "web-006", "category": "web", "text": "search the web for python tutorial", "expected": [{"tool": "web_search", "args": {"query": "python tutorial"}}], "also_ok": []}
+{"id": "web-007", "category": "web", "text": "search for pasta recipes", "expected": [{"tool": "web_search", "args": {"query": "pasta recipes"}}], "also_ok": []}
+{"id": "web-008", "category": "web", "text": "search for how to tie a tie", "expected": [{"tool": "web_search", "args": {"query": "how to tie a tie"}}], "also_ok": []}
+{"id": "web-009", "category": "web", "text": "search youtube for mr bean", "expected": [{"tool": "youtube_search", "args": {"query": "mr bean"}}], "also_ok": []}
+{"id": "web-010", "category": "web", "text": "youtube how to tie a tie", "expected": [{"tool": "youtube_search", "args": {"query": "how to tie a tie"}}], "also_ok": []}
+{"id": "web-011", "category": "web", "text": "play best movies 2026 on youtube", "expected": [{"tool": "youtube_search", "args": {"query": "best movies 2026"}}], "also_ok": []}
+{"id": "web-012", "category": "web", "text": "find python tutorial on youtube", "expected": [{"tool": "youtube_search", "args": {"query": "python tutorial"}}], "also_ok": []}
+{"id": "web-013", "category": "web", "text": "search youtube for cricket score", "expected": [{"tool": "youtube_search", "args": {"query": "cricket score"}}], "also_ok": []}
+{"id": "web-014", "category": "web", "text": "youtube taylor swift", "expected": [{"tool": "youtube_search", "args": {"query": "taylor swift"}}], "also_ok": []}
+{"id": "web-015", "category": "web", "text": "search youtube for champions league highlights", "expected": [{"tool": "youtube_search", "args": {"query": "champions league highlights"}}], "also_ok": []}
+{"id": "web-016", "category": "web", "text": "find pasta recipes on youtube", "expected": [{"tool": "youtube_search", "args": {"query": "pasta recipes"}}], "also_ok": []}
+{"id": "screen-001", "category": "screen", "text": "click subscribe", "expected": [{"tool": "click", "args": {"target": ["subscribe", "subscribe button"]}}], "also_ok": []}
+{"id": "screen-002", "category": "screen", "text": "click on sign in", "expected": [{"tool": "click", "args": {"target": ["sign in", "sign in button"]}}], "also_ok": []}
+{"id": "screen-003", "category": "screen", "text": "hit the skip ad button", "expected": [{"tool": "click", "args": {"target": ["skip ad", "skip ad button"]}}], "also_ok": []}
+{"id": "screen-004", "category": "screen", "text": "press the like button", "expected": [{"tool": "click", "args": {"target": ["like", "like button"]}}], "also_ok": []}
+{"id": "screen-005", "category": "screen", "text": "click the search box", "expected": [{"tool": "click", "args": {"target": ["search", "search button"]}}], "also_ok": []}
+{"id": "screen-006", "category": "screen", "text": "click accept all", "expected": [{"tool": "click", "args": {"target": ["accept all", "accept all button"]}}], "also_ok": []}
+{"id": "screen-007", "category": "screen", "text": "click on the first video", "expected": [{"tool": "click", "args": {"target": ["first video", "first video button"]}}], "also_ok": []}
+{"id": "screen-008", "category": "screen", "text": "tap on settings", "expected": [{"tool": "click", "args": {"target": ["settings", "settings button"]}}], "also_ok": []}
+{"id": "screen-009", "category": "screen", "text": "click next episode", "expected": [{"tool": "click", "args": {"target": ["next episode", "next episode button"]}}], "also_ok": []}
+{"id": "screen-010", "category": "screen", "text": "click download", "expected": [{"tool": "click", "args": {"target": ["download", "download button"]}}], "also_ok": []}
+{"id": "screen-011", "category": "screen", "text": "type hello world", "expected": [{"tool": "type_text", "args": {"text": "hello world"}}], "also_ok": []}
+{"id": "screen-012", "category": "screen", "text": "type in good morning", "expected": [{"tool": "type_text", "args": {"text": "good morning"}}], "also_ok": []}
+{"id": "screen-013", "category": "screen", "text": "write see you tomorrow", "expected": [{"tool": "type_text", "args": {"text": "see you tomorrow"}}], "also_ok": []}
+{"id": "screen-014", "category": "screen", "text": "type my name is shashank", "expected": [{"tool": "type_text", "args": {"text": "my name is shashank"}}], "also_ok": []}
+{"id": "screen-015", "category": "screen", "text": "enter the text happy birthday", "expected": [{"tool": "type_text", "args": {"text": "happy birthday"}}], "also_ok": []}
+{"id": "screen-016", "category": "screen", "text": "press enter", "expected": [{"tool": "press_keys", "args": {"keys": ["enter"]}}], "also_ok": []}
+{"id": "screen-017", "category": "screen", "text": "hit escape", "expected": [{"tool": "press_keys", "args": {"keys": ["esc", "escape"]}}], "also_ok": []}
+{"id": "screen-018", "category": "screen", "text": "press control t", "expected": [{"tool": "press_keys", "args": {"keys": ["ctrl+t"]}}], "also_ok": []}
+{"id": "screen-019", "category": "screen", "text": "press space", "expected": [{"tool": "press_keys", "args": {"keys": ["space"]}}], "also_ok": []}
+{"id": "screen-020", "category": "screen", "text": "press alt f4", "expected": [{"tool": "press_keys", "args": {"keys": ["alt+f4"]}}], "also_ok": []}
+{"id": "screen-021", "category": "screen", "text": "hit the tab key", "expected": [{"tool": "press_keys", "args": {"keys": ["tab"]}}], "also_ok": []}
+{"id": "screen-022", "category": "screen", "text": "press control c", "expected": [{"tool": "press_keys", "args": {"keys": ["ctrl+c"]}}], "also_ok": []}
+{"id": "screen-023", "category": "screen", "text": "press f11", "expected": [{"tool": "press_keys", "args": {"keys": ["f11"]}}], "also_ok": []}
+{"id": "screen-024", "category": "screen", "text": "scroll down", "expected": [{"tool": "scroll", "args": {"direction": "down"}}], "also_ok": []}
+{"id": "screen-025", "category": "screen", "text": "scroll up", "expected": [{"tool": "scroll", "args": {"direction": "up"}}], "also_ok": []}
+{"id": "screen-026", "category": "screen", "text": "scroll to the top", "expected": [{"tool": "scroll", "args": {"direction": "top"}}], "also_ok": []}
+{"id": "screen-027", "category": "screen", "text": "go to the bottom of the page", "expected": [{"tool": "scroll", "args": {"direction": "bottom"}}], "also_ok": []}
+{"id": "screen-028", "category": "screen", "text": "scroll down a bit", "expected": [{"tool": "scroll", "args": {"direction": "down"}}], "also_ok": []}
+{"id": "system-001", "category": "system", "text": "turn off the screen", "expected": [{"tool": "screen", "args": {"state": "off"}}], "also_ok": []}
+{"id": "system-002", "category": "system", "text": "go to sleep", "expected": [{"tool": "screen", "args": {"state": "off"}}], "also_ok": []}
+{"id": "system-003", "category": "system", "text": "screen off", "expected": [{"tool": "screen", "args": {"state": "off"}}], "also_ok": []}
+{"id": "system-004", "category": "system", "text": "turn the tv picture off", "expected": [{"tool": "screen", "args": {"state": "off"}}], "also_ok": []}
+{"id": "system-005", "category": "system", "text": "wake up", "expected": [{"tool": "screen", "args": {"state": "on"}}], "also_ok": []}
+{"id": "system-006", "category": "system", "text": "turn the screen back on", "expected": [{"tool": "screen", "args": {"state": "on"}}], "also_ok": []}
+{"id": "system-007", "category": "system", "text": "screen on", "expected": [{"tool": "screen", "args": {"state": "on"}}], "also_ok": []}
+{"id": "system-008", "category": "system", "text": "lock the computer", "expected": [{"tool": "lock", "args": {}}], "also_ok": []}
+{"id": "system-009", "category": "system", "text": "lock it", "expected": [{"tool": "lock", "args": {}}], "also_ok": []}
+{"id": "system-010", "category": "system", "text": "lock the pc", "expected": [{"tool": "lock", "args": {}}], "also_ok": []}
+{"id": "system-011", "category": "system", "text": "shut down the computer", "expected": [{"tool": "power", "args": {"action": "shutdown"}}], "also_ok": []}
+{"id": "system-012", "category": "system", "text": "turn off the pc", "expected": [{"tool": "power", "args": {"action": "shutdown"}}], "also_ok": []}
+{"id": "system-013", "category": "system", "text": "restart the computer", "expected": [{"tool": "power", "args": {"action": "restart"}}], "also_ok": []}
+{"id": "system-014", "category": "system", "text": "reboot", "expected": [{"tool": "power", "args": {"action": "restart"}}], "also_ok": []}
+{"id": "system-015", "category": "system", "text": "put the computer to sleep", "expected": [{"tool": "power", "args": {"action": "sleep"}}], "also_ok": []}
+{"id": "system-016", "category": "system", "text": "what time is it", "expected": [{"tool": "info", "args": {"what": "time"}}], "also_ok": []}
+{"id": "system-017", "category": "system", "text": "tell me the time", "expected": [{"tool": "info", "args": {"what": "time"}}], "also_ok": []}
+{"id": "system-018", "category": "system", "text": "what's the date today", "expected": [{"tool": "info", "args": {"what": "date"}}], "also_ok": []}
+{"id": "system-019", "category": "system", "text": "what day is it", "expected": [{"tool": "info", "args": {"what": "date"}}], "also_ok": []}
+{"id": "system-020", "category": "system", "text": "how much battery is left", "expected": [{"tool": "info", "args": {"what": "battery"}}], "also_ok": []}
+{"id": "multi-001", "category": "multi", "text": "open youtube and search for how to tie a tie", "expected": [{"tool": "open", "args": {"target": "youtube"}}, {"tool": "youtube_search", "args": {"query": "how to tie a tie"}}], "also_ok": [[{"tool": "youtube_search", "args": {"query": "how to tie a tie"}}]]}
+{"id": "multi-002", "category": "multi", "text": "open youtube and search for pasta recipes", "expected": [{"tool": "open", "args": {"target": "youtube"}}, {"tool": "youtube_search", "args": {"query": "pasta recipes"}}], "also_ok": [[{"tool": "youtube_search", "args": {"query": "pasta recipes"}}]]}
+{"id": "multi-003", "category": "multi", "text": "open youtube and search for champions league highlights", "expected": [{"tool": "open", "args": {"target": "youtube"}}, {"tool": "youtube_search", "args": {"query": "champions league highlights"}}], "also_ok": [[{"tool": "youtube_search", "args": {"query": "champions league highlights"}}]]}
+{"id": "multi-004", "category": "multi", "text": "open youtube and search for news today", "expected": [{"tool": "open", "args": {"target": "youtube"}}, {"tool": "youtube_search", "args": {"query": "news today"}}], "also_ok": [[{"tool": "youtube_search", "args": {"query": "news today"}}]]}
+{"id": "multi-005", "category": "multi", "text": "open chrome and go to gmail", "expected": [{"tool": "open", "args": {"target": ["chrome", "google chrome"]}}, {"tool": "open", "args": {"target": ["gmail"]}}], "also_ok": [[{"tool": "open", "args": {"target": ["gmail"]}}]]}
+{"id": "multi-006", "category": "multi", "text": "open brave and go to netflix", "expected": [{"tool": "open", "args": {"target": ["brave"]}}, {"tool": "open", "args": {"target": ["netflix"]}}], "also_ok": [[{"tool": "open", "args": {"target": ["netflix"]}}]]}
+{"id": "multi-007", "category": "multi", "text": "mute and turn off the screen", "expected": [{"tool": "mute", "args": {}}, {"tool": "screen", "args": {"state": "off"}}], "also_ok": []}
+{"id": "multi-008", "category": "multi", "text": "open notepad and type shopping list", "expected": [{"tool": "open", "args": {"target": "notepad"}}, {"tool": "type_text", "args": {"text": "shopping list"}}], "also_ok": []}
+{"id": "multi-009", "category": "multi", "text": "close chrome and open brave", "expected": [{"tool": "close", "args": {"target": ["chrome", "google chrome"]}}, {"tool": "open", "args": {"target": "brave"}}], "also_ok": []}
+{"id": "multi-010", "category": "multi", "text": "pause the video and lower the volume", "expected": [{"tool": "media", "args": {"action": "pause"}}, {"tool": "change_volume", "args": {"direction": "down"}}], "also_ok": []}
+{"id": "multi-011", "category": "multi", "text": "open a new tab and search for pizza near me", "expected": [{"tool": "browser", "args": {"action": "new_tab"}}, {"tool": "web_search", "args": {"query": "pizza near me"}}], "also_ok": []}
+{"id": "multi-012", "category": "multi", "text": "set volume to 20 and play music", "expected": [{"tool": "set_volume", "args": {"level": 20}}, {"tool": "media", "args": {"action": "play"}}], "also_ok": []}
+{"id": "multi-013", "category": "multi", "text": "minimize everything and lock the computer", "expected": [{"tool": "show_desktop", "args": {}}, {"tool": "lock", "args": {}}], "also_ok": []}
+{"id": "multi-014", "category": "multi", "text": "open spotify then skip the song", "expected": [{"tool": "open", "args": {"target": "spotify"}}, {"tool": "media", "args": {"action": "next"}}], "also_ok": []}
+{"id": "multi-015", "category": "multi", "text": "type hello and press enter", "expected": [{"tool": "type_text", "args": {"text": "hello"}}, {"tool": "press_keys", "args": {"keys": ["enter"]}}], "also_ok": []}
+{"id": "multi-016", "category": "multi", "text": "go home and turn the volume up", "expected": [{"tool": "go_home", "args": {}}, {"tool": "change_volume", "args": {"direction": "up"}}], "also_ok": []}
+{"id": "clarify-001", "category": "clarify", "text": "open it", "expected": [{"tool": "clarify", "args": {"question": "*"}}], "also_ok": []}
+{"id": "clarify-002", "category": "clarify", "text": "close that thing", "expected": [{"tool": "clarify", "args": {"question": "*"}}], "also_ok": []}
+{"id": "clarify-003", "category": "clarify", "text": "set the volume", "expected": [{"tool": "clarify", "args": {"question": "*"}}], "also_ok": []}
+{"id": "clarify-004", "category": "clarify", "text": "switch", "expected": [{"tool": "clarify", "args": {"question": "*"}}], "also_ok": []}
+{"id": "clarify-005", "category": "clarify", "text": "search for", "expected": [{"tool": "clarify", "args": {"question": "*"}}], "also_ok": []}
+{"id": "clarify-006", "category": "clarify", "text": "click the", "expected": [{"tool": "clarify", "args": {"question": "*"}}], "also_ok": []}
+{"id": "clarify-007", "category": "clarify", "text": "turn it", "expected": [{"tool": "clarify", "args": {"question": "*"}}], "also_ok": []}
+{"id": "escalate-001", "category": "escalate", "text": "what's the capital of france", "expected": [{"tool": "escalate", "args": {}}], "also_ok": []}
+{"id": "escalate-002", "category": "escalate", "text": "tell me a joke", "expected": [{"tool": "escalate", "args": {}}], "also_ok": []}
+{"id": "escalate-003", "category": "escalate", "text": "how tall is mount everest", "expected": [{"tool": "escalate", "args": {}}], "also_ok": []}
+{"id": "escalate-004", "category": "escalate", "text": "explain photosynthesis", "expected": [{"tool": "escalate", "args": {}}], "also_ok": []}
+{"id": "escalate-005", "category": "escalate", "text": "who is the prime minister of india", "expected": [{"tool": "escalate", "args": {}}], "also_ok": []}
+{"id": "escalate-006", "category": "escalate", "text": "what should i cook tonight", "expected": [{"tool": "escalate", "args": {}}], "also_ok": []}
+{"id": "escalate-007", "category": "escalate", "text": "how are you doing", "expected": [{"tool": "escalate", "args": {}}], "also_ok": []}
+{"id": "escalate-008", "category": "escalate", "text": "translate thank you to german", "expected": [{"tool": "escalate", "args": {}}], "also_ok": []}
+{"id": "escalate-009", "category": "escalate", "text": "what is two plus two times three", "expected": [{"tool": "escalate", "args": {}}], "also_ok": []}
+{"id": "escalate-010", "category": "escalate", "text": "write a poem about the sea", "expected": [{"tool": "escalate", "args": {}}], "also_ok": []}
+{"id": "escalate-011", "category": "escalate", "text": "why is the sky blue", "expected": [{"tool": "escalate", "args": {}}], "also_ok": []}
+{"id": "escalate-012", "category": "escalate", "text": "recommend a good movie", "expected": [{"tool": "escalate", "args": {}}], "also_ok": []}
+{"id": "cancel-001", "category": "cancel", "text": "never mind", "expected": [{"tool": "cancel", "args": {}}], "also_ok": []}
+{"id": "cancel-002", "category": "cancel", "text": "cancel", "expected": [{"tool": "cancel", "args": {}}], "also_ok": []}
+{"id": "cancel-003", "category": "cancel", "text": "forget it", "expected": [{"tool": "cancel", "args": {}}], "also_ok": []}
+{"id": "cancel-004", "category": "cancel", "text": "no stop", "expected": [{"tool": "cancel", "args": {}}], "also_ok": []}
+{"id": "cancel-005", "category": "cancel", "text": "that's all thanks", "expected": [{"tool": "cancel", "args": {}}], "also_ok": []}
+{"id": "cancel-006", "category": "cancel", "text": "nothing, sorry", "expected": [{"tool": "cancel", "args": {}}], "also_ok": []}
+{"id": "asr_noise-001", "category": "asr_noise", "text": "open crome", "expected": [{"tool": "open", "args": {"target": ["chrome", "google chrome"]}}], "also_ok": []}
+{"id": "asr_noise-002", "category": "asr_noise", "text": "open you tube", "expected": [{"tool": "open", "args": {"target": "youtube"}}], "also_ok": []}
+{"id": "asr_noise-003", "category": "asr_noise", "text": "valium up", "expected": [{"tool": "change_volume", "args": {"direction": "up"}}], "also_ok": []}
+{"id": "asr_noise-004", "category": "asr_noise", "text": "turn the bolume down", "expected": [{"tool": "change_volume", "args": {"direction": "down"}}], "also_ok": []}
+{"id": "asr_noise-005", "category": "asr_noise", "text": "paws the music", "expected": [{"tool": "media", "args": {"action": "pause"}}], "also_ok": []}
+{"id": "asr_noise-006", "category": "asr_noise", "text": "next sung", "expected": [{"tool": "media", "args": {"action": "next"}}], "also_ok": []}
+{"id": "asr_noise-007", "category": "asr_noise", "text": "open net flicks", "expected": [{"tool": "open", "args": {"target": "netflix"}}], "also_ok": []}
+{"id": "asr_noise-008", "category": "asr_noise", "text": "close the brave", "expected": [{"tool": "close", "args": {"target": "brave"}}], "also_ok": []}
+{"id": "asr_noise-009", "category": "asr_noise", "text": "search for whether in berlin", "expected": [{"tool": "web_search", "args": {"query": ["weather in berlin", "whether in berlin"]}}], "also_ok": []}
+{"id": "asr_noise-010", "category": "asr_noise", "text": "open note pad", "expected": [{"tool": "open", "args": {"target": "notepad"}}], "also_ok": []}
+{"id": "asr_noise-011", "category": "asr_noise", "text": "new tap", "expected": [{"tool": "browser", "args": {"action": "new_tab"}}], "also_ok": []}
+{"id": "asr_noise-012", "category": "asr_noise", "text": "set the volume to thirty", "expected": [{"tool": "set_volume", "args": {"level": 30}}], "also_ok": []}
+{"id": "asr_noise-013", "category": "asr_noise", "text": "mute the toy", "expected": [{"tool": "mute", "args": {}}], "also_ok": []}
+{"id": "asr_noise-014", "category": "asr_noise", "text": "open what's app", "expected": [{"tool": "open", "args": {"target": "whatsapp"}}], "also_ok": []}
+{"id": "asr_noise-015", "category": "asr_noise", "text": "screw down", "expected": [{"tool": "scroll", "args": {"direction": "down"}}], "also_ok": []}
+{"id": "asr_noise-016", "category": "asr_noise", "text": "lock the come puter", "expected": [{"tool": "lock", "args": {}}], "also_ok": []}
