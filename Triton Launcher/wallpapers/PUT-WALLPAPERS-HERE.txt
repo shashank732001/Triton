@@ -1,0 +1,13 @@
+Drop a video (.mp4 / .webm) or picture (.jpg / .png / .webp) in this folder.
+
+With "wallpaper": "auto" in config.json the launcher plays ALL videos in this folder,
+one after another in name order (set "shuffleWallpapers": true for random order).
+With no videos it shows the first picture, otherwise the built-in live wallpaper.
+
+To pick a specific file, set for example:
+  "wallpaper": "wallpapers/beach.mp4"
+For the built-in live wallpaper in another colour:
+  "wallpaper": "live:sunset"      (aurora, sunset, ocean, midnight)
+
+Videos play muted and loop. 1080p H.264 MP4 at 30 fps is the lightest for the NUC.
+The video pauses automatically while Chrome/Brave/etc. are in front.

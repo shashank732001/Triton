@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Triton Launcher</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="booting">
+  <!-- Loading screen shown at sign-in until wallpaper, weather and fonts are ready -->
+  <div class="boot" id="boot">
+    <div class="boot-glow"></div>
+    <div class="boot-inner">
+      <div class="boot-mark">triton</div>
+      <div class="boot-bar"><i></i></div>
+    </div>
+  </div>
+
+  <!-- Background: live gradient, image or looping video (see config.json "wallpaper") -->
+  <div id="wallpaper" class="wallpaper"></div>
+  <div class="grain"></div>
+  <div class="scrim"></div>
+
+  <div class="greet" id="greet"></div>
+
+  <header class="bar" data-zone="bar">
+    <button class="pill" id="voiceBtn" title="Voice assistant: say &quot;Hey Triton&quot;" hidden></button>
+    <button class="pill" id="wifiBtn" title="Wi-Fi networks"></button>
+    <button class="pill" id="volBtn" title="Volume"></button>
+    <button class="pill pill-accent" id="powerBtn" title="Leave the launcher">
+      <svg viewBox="0 0 24 24" class="fill"><path d="M3 3h8.5v8.5H3zM12.5 3H21v8.5h-8.5zM3 12.5h8.5V21H3zM12.5 12.5H21V21h-8.5z"/></svg>
+      <span>Windows</span>
+    </button>
+  </header>
+
+  <section class="popover switcher" id="pop-windows" tabindex="-1" hidden>
+    <div class="pop-head"><span>Open apps</span><b id="winCount"></b></div>
+    <div class="win-grid" id="winGrid"></div>
+    <div class="pop-hint">Pick an app to bring it back, including minimized ones. <kbd>Esc</kbd> closes.</div>
+  </section>
+
+  <section class="popover" id="pop-volume" hidden>
+    <div class="pop-head"><span>Volume</span><b id="volValue">–</b></div>
+    <input type="range" id="volRange" min="0" max="100" step="2" value="50" aria-label="Volume">
+    <button class="pop-item" id="muteBtn">
+      <span class="pi-icon" id="muteIcon"></span>
+      <span class="pi-text"><b id="muteLabel">Mute</b></span>
+    </button>
+    <button class="pop-item" id="soundBtn">
+      <span class="pi-icon"><svg viewBox="0 0 24 24"><path d="M4 14v-4M8 17V7M12 20V4M16 16V8M20 13v-2"/></svg></span>
+      <span class="pi-text"><b>Sound settings</b><small>Output device, TV speakers</small></span>
+    </button>
+  </section>
+
+  <section class="popover" id="pop-power" hidden>
+    <div class="pop-head"><span>Leave launcher</span></div>
+    <button class="pop-item" id="exitBtn">
+      <span class="pi-icon"><svg viewBox="0 0 24 24" class="fill"><path d="M3 3h8.5v8.5H3zM12.5 3H21v8.5h-8.5zM3 12.5h8.5V21H3zM12.5 12.5H21V21h-8.5z"/></svg></span>
+      <span class="pi-text"><b>Exit to Windows</b><small id="exitSub">The launcher comes back on next restart</small></span>
+    </button>
+    <button class="pop-item" id="restartBtn">
+      <span class="pi-icon"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></svg></span>
+      <span class="pi-text"><b id="restartLabel">Restart in TV mode</b><small id="restartSub">Only Triton, no Windows desktop: more memory and CPU for Triton</small></span>
+    </button>
+    <button class="pop-item" id="autostartBtn" role="switch">
+      <span class="pi-icon"><svg viewBox="0 0 24 24"><path d="M12 3v8M6.4 6.4a8 8 0 1 0 11.2 0"/></svg></span>
+      <span class="pi-text"><b>Start on boot</b><small>Open this launcher when Windows starts</small></span>
+      <span class="switch" aria-hidden="true"></span>
+    </button>
+    <p class="pop-hint">Press <kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>Home</kbd> anytime to come back here</p>
+  </section>
+
+  <main class="hero">
+    <div class="clock">
+      <div class="date" id="date"></div>
+      <div class="time" id="time"></div>
+    </div>
+    <div class="weather" id="weather" hidden></div>
+  </main>
+
+  <nav class="dock" id="apps" data-zone="apps"></nav>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
