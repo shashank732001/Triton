@@ -17,7 +17,6 @@ import queue
 import random
 import re
 import subprocess
-from difflib import SequenceMatcher
 import sys
 import threading
 import time
@@ -30,6 +29,7 @@ import pystray
 import sounddevice as sd
 import openwakeword
 from openwakeword.model import Model as WakeWordModel
+from openwakeword.vad import VAD
 from PIL import Image, ImageDraw
 from scipy.signal import firwin, lfilter, lfilter_zi
 from vosk import KaldiRecognizer, Model as VoskModel, SetLogLevel
@@ -37,7 +37,9 @@ from vosk import KaldiRecognizer, Model as VoskModel, SetLogLevel
 import actions
 import events
 import sounds
+import wake_check
 from apps import Catalog
+from audio_hub import AudioHub
 from brain import clauses
 from brain.llm import LocalLLM
 from brain.remote import RemoteBrain
@@ -54,6 +56,7 @@ from speaker import Speaker
 from tools import safety, screenshare
 from tools.handlers import Tools, say_first, shown_first
 from transcriber import Transcriber
+from wake_check import strip_wake
 
 # When packaged as TritonVoice.exe (PyInstaller), models/ and the log live next to the exe
 BASE_DIR = Path(sys.executable if getattr(sys, "frozen", False) else __file__).resolve().parent
@@ -182,6 +185,30 @@ SAVE_WAKE_CLIPS = SETTINGS.get("save_wake_clips", True)
 NEAR_MISS_SCORE = 0.02         # a sentence that scored this much without waking counts as a near miss
 WAKE_CLIP_DIR = BASE_DIR / "voice_samples" / WAKE_WORD / "live"
 
+# ---------- listening the whole time, as Max does ----------
+# The mic is never emptied or paused between steps (audio_hub.py): what you say while Triton thinks or talks is kept.
+# After Triton stops talking, only this much of the mic is skipped (the tail of its own voice; Max: 120 ms). Was a fixed
+# 0.3 s pause plus throwing away everything heard until then.
+RESUME_GUARD_SEC = 0.15
+# Talking over Triton (Max's barge-in): while it answers, start talking and it stops at once and takes what you're
+# saying as the next request, from its first word, no wake word. Needs echo cancellation (echo.py) so its own voice
+# isn't taken for yours; "off" = only "Hey Triton" cuts it short, as before. Only inside a conversation.
+BARGE_IN = SETTINGS.get("barge_in", "auto")
+BARGE_MIN_SPEECH_SEC = 0.32       # this much of you talking in a row (Max: 300 ms); a cough or "mm" doesn't stop it
+BARGE_LOUDER = 2.5                # ...and louder than what's left of Triton's own voice after echo cancellation
+BARGE_MIN_RMS = 150
+# Continuing after a pause (Max's continue_grace): when a pause is taken for the end of a sentence, Triton starts working
+# on it but keeps listening; if you go on ("open Netflix ... and select Shashank"), that answer is dropped and the
+# whole sentence is understood instead. Answers from the fixed rules aren't held; the model's are held this long.
+CONTINUE_GRACE_SEC = float(SETTINGS.get("continue_grace_sec", 0.6))
+CONTINUE_MIN_SPEECH_SEC = 0.24
+CONTINUE_WATCH_MAX_SEC = 15       # never watch longer than this (a laptop answer that never comes)
+FOLLOW_UP_PREROLL_SEC = 0.3       # audio kept from before you started talking over Triton
+# False wake-ups (wake_check.py): the wake word must contain this much speech (a real "Hey Triton" always has 0.4 s+),
+# and while Triton itself is talking, and this long after, it needs the stricter media threshold (as Max ignores
+# what comes back from his own speakers)
+OWN_VOICE_TAIL_SEC = 1.5
+
 logging.basicConfig(
     filename=LOG_FILE,
     level=logging.INFO,
@@ -203,30 +230,6 @@ class SYSTEM_POWER_STATUS(ctypes.Structure):
     _fields_ = [("ACLineStatus", ctypes.c_ubyte), ("BatteryFlag", ctypes.c_ubyte),
                 ("BatteryLifePercent", ctypes.c_ubyte), ("SystemStatusFlag", ctypes.c_ubyte),
                 ("BatteryLifeTime", ctypes.c_ulong), ("BatteryFullLifeTime", ctypes.c_ulong)]
-
-
-_HEY = {"hey", "hay", "hi", "hair", "head", "hit", "here", "he", "hate", "heat", "eh", "a", "hello", "okay", "ok"}
-
-
-def _tritonish(words):
-    s = re.sub(r"[^a-z]", "", "".join(words).lower())
-    return len(s) >= 4 and SequenceMatcher(None, s, "triton").ratio() >= 0.6
-
-
-def strip_wake(text):
-    """The command without "Hey Triton" (or how Whisper misheard it: "hair triter", "hey tritan") at its start:
-    said in one breath, or said again after the reply. "" when that was all there was."""
-    w = text.split()
-    for i in range(min(3, len(w))):                  # "um hey triton", "hey hey triton"
-        if re.sub(r"[^a-z]", "", w[i].lower()) in _HEY:
-            for k in (1, 2):
-                if i + 1 + k <= len(w) and _tritonish(w[i + 1:i + 1 + k]):
-                    return " ".join(w[i + 1 + k:]).lstrip(",. ")
-    if w and len(w[0]) > 4 and _tritonish(w[:1]):   # "triton, open youtube"
-        return " ".join(w[1:]).lstrip(",. ")
-    return text
-
-
 
 
 def garbled(text):
@@ -399,13 +402,95 @@ class VoiceGate:
         return [], False
 
 
+class _WakeWatch:
+    """ "Hey Triton" while Triton is busy (thinking or talking), with the same checks as while it waits: threshold and
+    patience (stricter while its own voice may be in the mic) and enough speech in it (wake_check.speech_check)."""
+
+    def __init__(self, me):
+        self.me, self.gate, self.hits = me, VoiceGate(), 0
+        self.probs = deque(maxlen=40)
+        me.wake.reset()
+        me._vad().reset_states()
+
+    def push(self, frame):
+        """One mic frame in; True when the wake word was said."""
+        me = self.me
+        frames, closed = self.gate.push(frame)
+        heard = False
+        for f in frames:
+            s = me.wake.predict(f).get(WAKE_WORD, 0)
+            self.probs.append(me._speech_in(f))
+            self.hits = self.hits + 1 if s >= me._wake_threshold() else 0
+            if self.hits >= me._wake_patience():
+                ok, sec = wake_check.speech_check(self.probs)
+                if ok:
+                    heard = True
+                    break
+                log.info("Wake word ignored while busy (score %.2f): only %.2f s of speech", s, sec)
+                self.hits = 0
+        if heard or closed:
+            me.wake.reset()
+            me._vad().reset_states()
+            self.hits = 0
+            self.probs.clear()
+        return heard
+
+
+class _Decision:
+    """Working out what was said (Assistant._decide) in its own thread, while the mic keeps listening (Max's
+    early thinking and continue grace). Until release(), anything it wants to say waits; if you go on talking,
+    abandon() drops it: nothing it wanted to say is said, the laptop is told to stop, and its result is ignored."""
+
+    def __init__(self, me, heard, heard_free):
+        self.me = me
+        self.released, self.abandoned, self.done = threading.Event(), threading.Event(), threading.Event()
+        self.result = None
+        self.started = time.monotonic()
+        me._hold = self              # before the thread starts, so even its first word waits
+        threading.Thread(target=self._run, args=(heard, heard_free), name="decide", daemon=True).start()
+
+    def _run(self, heard, heard_free):
+        self.me._tl.job = self
+        try:
+            self.result = self.me._decide(heard, heard_free)
+        except Exception:
+            log.exception("Deciding failed for %r", heard_free or heard)
+        finally:
+            self.done.set()
+
+    @property
+    def quick(self):
+        """Decided by this device's fixed rules: a whole command, acted on at once. (Not "ask again": an unclear
+        fragment waits CONTINUE_GRACE_SEC, since the rest of the sentence may be on its way.)"""
+        return self.done.is_set() and bool(self.result) and self.result[4] in ("rules", "screen share")
+
+    def release(self):
+        self.released.set()
+
+    def abandon(self):
+        self.abandoned.set()
+        self.released.set()
+        if self.me.remote:
+            try:
+                self.me.remote.cancel()
+            except Exception:
+                pass
+
+    def wait(self, timeout=180):
+        self.done.wait(timeout)
+        return self.result
+
+
 # ---------- assistant ----------
 
 class Assistant:
     def __init__(self):
         self.paused = threading.Event()
         self.stopped = threading.Event()
-        self.audio = queue.Queue()
+        # The mic, kept and shared (audio_hub.py): each thread reads it at its own position, nothing is thrown away
+        self.audio = AudioHub()
+        self._tl = threading.local()       # per thread: its mic position, its voice detector, the decision it works on
+        self._hold = None                  # a decision whose speech waits until it's sure you've finished (_Decision)
         self.icon = None
         self.overlay = Overlay()
         self.overlay.loading("Triton is starting…")
@@ -504,19 +589,67 @@ class Assistant:
             except Exception:
                 log.exception("Echo cancellation failed; mic audio as is from now on")
                 self.echo = None
-        self.audio.put(block)
+        self.audio.push(block)
+
+    def _reader(self):
+        """This thread's position in the mic (made the first time, at "now")."""
+        r = getattr(self._tl, "reader", None)
+        if r is None:
+            r = self._tl.reader = self.audio.reader()
+        return r
+
+    def _vad(self, name="vad"):
+        """This thread's own speech detector (Silero keeps state, so threads can't share one); name: a second one
+        on the same thread for a different stream of frames (barge-in hears every frame, the wake check only some)."""
+        v = getattr(self._tl, name, None)
+        if v is None:
+            v = VAD()
+            setattr(self._tl, name, v)
+        return v
 
     def _next_frame(self, timeout=0.5):
-        try:
-            return self.audio.get(timeout=timeout)
-        except queue.Empty:
-            return None
+        return self._reader().next(timeout)
 
     def _clear_audio(self):
-        with self.audio.mutex:
-            self.audio.queue.clear()
+        """Listen from now on (what was said before is skipped)."""
+        self._reader().skip_to_now()
 
-    def _listen_for_command(self, window=COMMAND_WINDOW_SEC):
+    def _after_own_voice(self):
+        """Listen on from where Triton's own voice ended (plus RESUME_GUARD_SEC), keeping anything you said after that.
+        Replaces the old "wait 0.3 s and throw everything away"."""
+        r = self._reader()
+        if not self.speaker:
+            return
+        quiet = self.speaker.quiet_for
+        if quiet < RESUME_GUARD_SEC:
+            time.sleep(RESUME_GUARD_SEC - quiet)
+            quiet = RESUME_GUARD_SEC
+        r.seek(max(r.position, self.audio.now - int((quiet - RESUME_GUARD_SEC) / self.audio.frame_sec)))
+
+    def _own_voice_near(self):
+        """Is Triton talking, or did it just stop? Then a wake word in the mic may be its own voice coming back."""
+        return bool(self.speaker) and self.speaker.quiet_for < OWN_VOICE_TAIL_SEC
+
+    def _wake_patience(self):
+        return MEDIA_WAKE_PATIENCE if self.media_playing or self._own_voice_near() else WAKE_PATIENCE
+
+    def _speech_in(self, frames):
+        """Silero's score for one frame (on this thread's detector)."""
+        return float(self._vad().predict(frames.astype(np.float32), frame_size=FRAME_SIZE // 2))
+
+    def _complete(self, text):
+        """Do the words so far already make a whole command the fixed rules can do? Then the end of the sentence comes
+        sooner (endpoint.COMPLETE_SILENCE_SEC). Cached: asked for every 80 ms frame."""
+        cache = getattr(self._tl, "complete", None)
+        if cache is None or cache[0] != text:
+            try:
+                sure = bool(text.split()) and bool(self.router.rules(text))
+            except Exception:
+                sure = False
+            cache = self._tl.complete = (text, sure)
+        return cache[1]
+
+    def _listen_for_command(self, window=COMMAND_WINDOW_SEC, skip=None):
         """What was said after the wake word, as (grammar text, free text).
 
         Two recognisers hear the same audio: one limited to the command words (accurate, what the
@@ -538,7 +671,9 @@ class Assistant:
         stop_on_rules = not self.ears and not (self.remote and self.remote.mode == "always")
         # When the command is over: voice activity (endpoint.py), not a fixed window. `window` is how long you have
         # to start talking; a long sentence may go on (up to 12 s) and ends ~0.8 s after you stop.
-        ep = Endpointer(start_window=window, only_wake=lambda text: not strip_wake(WAKE_PREFIX.sub("", text)))
+        # skip: seconds at the start that can't end it (the tail of "Hey Triton"); 0 when there was no wake word
+        ep = Endpointer(start_window=window, only_wake=lambda text: not strip_wake(WAKE_PREFIX.sub("", text)),
+                        complete=self._complete, **({} if skip is None else {"skip_sec": skip}))
         hard_stop = time.monotonic() + window + ep.max_sec      # in case the mic stops delivering frames
         heard, heard_free = [], []
         partial = ""
@@ -701,6 +836,7 @@ class Assistant:
         mic_info = sd.query_devices(mic if mic is not None else sd.default.device[0])
         log.info("Using mic '%s' (%s) at %d Hz", mic_info["name"],
                  sd.query_hostapis(mic_info["hostapi"])["name"], mic_rate)
+        self.audio.clear()
         self._clear_audio()
 
         with sd.InputStream(device=mic, samplerate=mic_rate, channels=channels, dtype="int16",
@@ -717,6 +853,7 @@ class Assistant:
             self.wake.reset()
             hits = 0                     # frames in a row at/above WAKE_THRESHOLD
             heard_by_model = deque(maxlen=40)    # what the wake model got this time (~3 s), for live clips
+            speech_probs = deque(maxlen=40)      # the speech detector's score for each of those frames
             best = 0.0                           # its best score this time someone spoke
             # Leaving this loop closes the stream, which releases the mic while paused
             while not self.stopped.is_set() and not self.paused.is_set():
@@ -739,7 +876,8 @@ class Assistant:
                     self.wake.reset()
                     gate, hits, best = VoiceGate(), 0, 0.0
                     heard_by_model.clear()
-                    self._clear_audio()
+                    speech_probs.clear()
+                    self._after_own_voice()
                     continue
 
                 frame = self._next_frame()
@@ -770,17 +908,33 @@ class Assistant:
                 for f in frames:
                     s = self.wake.predict(f).get(WAKE_WORD, 0)
                     heard_by_model.append(f)
+                    speech_probs.append(self._speech_in(f))
                     best = max(best, s)
                     hits = hits + 1 if s >= threshold else 0
-                    if hits >= (MEDIA_WAKE_PATIENCE if self.media_playing else WAKE_PATIENCE):
+                    if hits >= self._wake_patience():
                         score = max(score, s)
+                if score >= threshold:
+                    # A real "Hey Triton" has speech in it; a click, a door, music or a sound effect hardly any
+                    has_speech, speech_sec = wake_check.speech_check(speech_probs)
+                    if not has_speech:
+                        log.info("Wake word ignored (score %.2f): only %.2f s of speech in it, so not a voice",
+                                 score, speech_sec)
+                        events.emit("wake_ignored", score=round(score, 2), speech=round(speech_sec, 2))
+                        if not self.sharing:
+                            self._save_wake_clip(heard_by_model, f"nospeech_{score:.2f}")
+                        self.wake.reset()
+                        hits, score, best = 0, 0.0, 0.0
+                        heard_by_model.clear()
+                        speech_probs.clear()
                 if gate_closed:
                     # (not while the laptop's audio plays here: those clips would teach the wake word its sound)
                     if best >= NEAR_MISS_SCORE and score < threshold and not self.sharing:
                         self._save_wake_clip(heard_by_model, f"near_{best:.2f}")
                     self.wake.reset()   # don't carry stale state into the next time someone speaks
+                    self._vad().reset_states()
                     hits = 0
                     heard_by_model.clear()
+                    speech_probs.clear()
                     best = 0.0
 
                 if DEBUG_LEVELS_SEC:
@@ -818,7 +972,8 @@ class Assistant:
                     self.wake.reset()
                     gate, hits, best = VoiceGate(), 0, 0.0
                     heard_by_model.clear()
-                    self._clear_audio()
+                    speech_probs.clear()
+                    self._after_own_voice()
                     continue
                 if self.speaker:
                     self.speaker.stop()     # talking over Triton cuts it short
@@ -826,31 +981,42 @@ class Assistant:
                 # "Yes sir?" (finished before listening starts, or the mic would hear it as the command);
                 # the chime when there's no voice yet
                 if WAKE_STYLE == "voice" and WAKE_REPLIES and self._say(random.choice(WAKE_REPLIES), wait=True):
-                    # Drop audio from the reply's loud end (the mic hears it too) so it isn't read as a command
-                    time.sleep(0.3)
-                    self._clear_audio()
+                    # Skip the reply's own sound in the mic (it'd be read as the command), keep what came after it
+                    self._after_own_voice()
                 else:
                     # "chime" (default): a short chime, and the audio since the wake word is kept, so "Hey Triton,
                     # open YouTube" works in one breath (strip_wake removes the wake phrase's tail). ~1 s faster.
                     sounds.wake()
 
-                heard, heard_free = self._listen_for_command()
+                # Listens, and starts working on it while still listening (_hear_and_decide)
+                heard, heard_free, decided = self._hear_and_decide()
                 log.info("Heard command: %r (free: %r)", heard, heard_free)
-                events.emit("heard", text=heard_free or heard, grammar=heard, by="voice")
                 self.overlay.set_level(0)
-                going_on = self._do(heard, heard_free)
-                self._remember(heard_free or heard)
-                if FOLLOW_UP_SEC and going_on:          # also after "sorry, say that again": listen for it
-                    self._converse()
+                if not (heard or heard_free) and not getattr(self, "only_wake", False):
+                    # Woke up and nobody said anything: most likely a false wake-up (45 of 78 in the log were). Back
+                    # to waiting, quietly: no "say that again" and no follow-up listening, which used to answer the
+                    # room out loud and then take the TV's next words as a command
+                    log.info("Nothing said after the wake word (score %.2f): taken as a false wake-up, back to waiting",
+                             score)
+                    events.emit("false_wake", score=round(score, 2))
+                    self.overlay.hide()
+                else:
+                    events.emit("heard", text=heard_free or heard, grammar=heard, by="voice")
+                    going_on = self._do(heard, heard_free, decided=decided)
+                    self._remember(heard_free or heard)
+                    if FOLLOW_UP_SEC and going_on:          # also after "sorry, say that again": listen for it
+                        self._converse()
                 # Followed by a command: almost surely real. Silence after it: often a false wake-up.
                 self._save_wake_clip(wake_clip, f"wake_{score:.2f}_{'cmd' if heard or heard_free else 'nocmd'}")
 
                 self.wake.reset()
+                self._vad().reset_states()
                 gate = VoiceGate()
                 hits = 0
                 heard_by_model.clear()
+                speech_probs.clear()
                 best = 0.0
-                self._clear_audio()
+                self._after_own_voice()
 
     def _handle_typed(self, text):
         """A command typed in the test console: the same steps as a spoken one, minus the ears."""
@@ -1003,31 +1169,28 @@ class Assistant:
     def _watch_for_wake(self, busy, timeout=30):
         """While busy() (thinking or talking), keep listening for the wake word only. True = it was said, so
         the caller stops what it's doing. Its own voice can't do this: the personal voice check rejects it."""
-        gate, hits = VoiceGate(), 0
-        self.wake.reset()
+        watch = _WakeWatch(self)
         end = time.monotonic() + timeout
+        job = getattr(self._tl, "job", None)       # set when this runs for a decision made while still listening
         while busy() and time.monotonic() < end and not self.stopped.is_set():
+            if job is not None and job.abandoned.is_set():
+                return True                         # you went on talking: this decision is dropped, stop waiting
             frame = self._next_frame(0.1)
             if frame is None:
                 continue
-            frames, closed = gate.push(frame)
-            for f in frames:
-                hits = hits + 1 if self.wake.predict(f).get(WAKE_WORD, 0) >= self._wake_threshold() else 0
-                if hits >= WAKE_PATIENCE:
-                    self.wake.reset()
-                    if self.speaker:
-                        self.speaker.stop()
-                    return True
-            if closed:
-                self.wake.reset()
-                hits = 0
+            if watch.push(frame):
+                if self.speaker:
+                    self.speaker.stop()
+                return True
         return False
 
     def _wake_threshold(self):
-        # While the laptop's sound or a video plays here, be stricter (your own takes score 0.84+ with the voice check)
+        # While the laptop's sound or a video plays here, or Triton itself is talking (or just was), be stricter
+        # (your own takes score 0.84+ with the voice check)
         if self.sharing:
             return max(WAKE_THRESHOLD, SHARING_WAKE_THRESHOLD)
-        return max(WAKE_THRESHOLD, MEDIA_WAKE_THRESHOLD) if self.media_playing else WAKE_THRESHOLD
+        strict = self.media_playing or self._own_voice_near()
+        return max(WAKE_THRESHOLD, MEDIA_WAKE_THRESHOLD) if strict else WAKE_THRESHOLD
 
     def _snooze(self, seconds):
         self.snooze_until = time.monotonic() + seconds if seconds != math.inf else math.inf
@@ -1164,6 +1327,14 @@ class Assistant:
 
     def _say(self, text, wait=False, start_within=0):
         """Say text out loud. False when there's no voice (yet), so the caller plays a chime instead."""
+        job = self._hold if threading.current_thread() is not threading.main_thread() else None
+        if job is not None:
+            # Worked out while you may still be talking (_Decision): wait until that's clear; dropped if you went on
+            job.released.wait(CONTINUE_WATCH_MAX_SEC)
+        mine = getattr(self._tl, "job", None)
+        if any(j is not None and j.abandoned.is_set() for j in (job, mine)):
+            log.info("Not said (you went on talking): %r", text)
+            return True
         events.emit("said", text=text)
         return bool(self.speaker) and self.speaker.say(text, wait=wait, start_within=start_within)
 
@@ -1180,6 +1351,139 @@ class Assistant:
         if not self._say(text):
             sounds.fail()
 
+    def _barge_in_on(self):
+        if self.sharing or BARGE_IN == "off":
+            return False
+        return BARGE_IN == "on" or self.echo is not None
+
+    def _hear_and_decide(self, window=COMMAND_WINDOW_SEC, skip=None):
+        """Listen for a request and work it out while still listening: (heard, heard_free, decided). decided is
+        _decide()'s answer, or None when there's nothing to decide (or it failed; _do then decides itself).
+
+        As in Max: once a pause looks like the end of the sentence, the decision starts at once (in a _Decision
+        thread) and the mic stays open. If you go on talking before Triton acts or speaks, the decision is dropped
+        and the whole sentence is understood instead ("open Netflix ... and select Shashank")."""
+        heard, heard_free = self._listen_for_command(window, skip)
+        for _ in range(4):                       # at most a few "and then..." continuations
+            if not (heard or heard_free) or getattr(self, "only_wake", False):
+                return heard, heard_free, None
+            job = _Decision(self, heard, heard_free)       # (holds its speech: self._hold)
+            more = None
+            try:
+                more = self._listen_for_more(job)
+            finally:
+                if more is None:
+                    job.release()
+                else:
+                    job.abandon()
+                self._hold = None
+            if more is None:
+                return heard, heard_free, job.wait()
+            rest_heard, rest_free = more
+            rest = (rest_free or rest_heard).strip()
+            if getattr(self, "only_wake", False) or ENOUGH.match(rest) or rest.lower().strip(" .!") in CANCEL_WORDS:
+                # "Hey Triton" again, or "never mind": that's the request now, not a continuation
+                log.info("You went on with %r: the first part (%r) is dropped", rest, heard_free or heard)
+                return rest_heard, rest_free, None
+            log.info("You went on: %r + %r", heard_free or heard, rest)
+            joined_free = " ".join(x for x in (heard_free or heard, rest_free or rest_heard) if x)
+            heard = " ".join(x for x in (heard, rest_heard) if x)
+            heard_free = joined_free if (heard_free or rest_free) else ""
+        return heard, heard_free, None
+
+    def _listen_for_more(self, job):
+        """While `job` works out what was said, keep listening. None: you didn't go on (the decision stands). Else
+        (heard, heard_free) of what you said next, from its first word.
+
+        Answers from the fixed rules are used at once; the model's and the laptop's wait CONTINUE_GRACE_SEC after the
+        sentence ended (they take that long anyway), and going on still counts until Triton starts to speak."""
+        r = self._reader()
+        vad = self._vad("vad_more")
+        vad.reset_states()
+        run, start = 0, None
+        t0 = time.monotonic()
+        while not self.stopped.is_set():
+            elapsed = time.monotonic() - t0
+            if job.done.is_set() and (job.quick or elapsed >= CONTINUE_GRACE_SEC):
+                return None
+            if elapsed >= CONTINUE_GRACE_SEC and not job.released.is_set():
+                job.release()                    # its "Hmm." or first sentence may start now
+            if job.released.is_set() and self.speaker and self.speaker.speaking:
+                return None                      # Triton has started talking: from here "Hey Triton" cuts it short
+            if elapsed >= CONTINUE_WATCH_MAX_SEC:
+                return None
+            frame = r.next(0.05)
+            if frame is None:
+                continue
+            p = float(vad.predict(frame.astype(np.float32), frame_size=FRAME_SIZE // 2))
+            if p >= 0.5:
+                if run == 0:
+                    start = r.position - 1
+                run += 1
+                if run * self.audio.frame_sec >= CONTINUE_MIN_SPEECH_SEC - 1e-9:
+                    break
+            elif p < 0.3:
+                run = 0
+        else:
+            return None
+        log.info("Talking again %.1f s after the sentence seemed to end; hearing the rest", time.monotonic() - t0)
+        r.seek(start - int(round(FOLLOW_UP_PREROLL_SEC / self.audio.frame_sec)))
+        # (hearing the rest replaces these; the decision still running may need the first part's)
+        audio_before, screen_before = getattr(self, "last_command_audio", None), getattr(self, "screen", None)
+        rest_heard, rest_free = self._listen_for_command(window=2.0, skip=0)
+        rest = rest_free or rest_heard
+        if not rest or garbled(rest):
+            log.info("...only %r: not a continuation, the decision stands", rest)
+            self.only_wake = False
+            self.last_command_audio, self.screen = audio_before, screen_before
+            return None
+        if audio_before is not None and self.last_command_audio is not None:
+            self.last_command_audio = np.concatenate([audio_before, self.last_command_audio])
+        return rest_heard, rest_free
+
+    def _while_talking(self, timeout=60):
+        """While Triton talks: "Hey Triton" cuts it short (as before), and when barge-in is on (_barge_in_on), simply
+        talking over it does too: it stops at once and the mic is set back to just before you started, so what you
+        say is the next request from its first word. "wake", "barge", or None when it finished talking."""
+        if not self.speaker or not self.speaker.speaking:
+            return None
+        r = self._reader()
+        watch = _WakeWatch(self)
+        barge = self._barge_in_on()
+        vad = self._vad("vad_barge")
+        vad.reset_states()
+        run, start, floor = 0, None, None
+        end = time.monotonic() + timeout
+        while self.speaker.speaking and time.monotonic() < end and not self.stopped.is_set():
+            frame = r.next(0.1)
+            if frame is None:
+                continue
+            if watch.push(frame):
+                self.speaker.stop()
+                return "wake"
+            if not barge:
+                continue
+            x = frame.astype(np.float32)
+            rms = float(np.sqrt(np.mean(x ** 2)))
+            p = float(vad.predict(x, frame_size=FRAME_SIZE // 2))
+            # Louder than what's left of Triton's own voice after echo cancellation (followed closely downwards, slowly
+            # upwards, so your voice doesn't become the yardstick), and speech by the detector
+            if p >= 0.6 and rms > max(BARGE_MIN_RMS, (floor or 0) * BARGE_LOUDER):
+                if run == 0:
+                    start = r.position - 1
+                run += 1
+                if run * self.audio.frame_sec >= BARGE_MIN_SPEECH_SEC - 1e-9:
+                    self.speaker.stop()
+                    log.info("Talked over Triton (%.2f s of speech, level %.0f against its own voice at %.0f): "
+                             "stopped, listening", run * self.audio.frame_sec, rms, floor or 0)
+                    events.emit("barge_in")
+                    r.seek(start - int(round(FOLLOW_UP_PREROLL_SEC / self.audio.frame_sec)))
+                    return "barge"
+            elif p < 0.4:
+                run = 0
+            floor = rms if floor is None else floor + (rms - floor) * (0.3 if rms < floor else 0.03)
+        return None
+
     def _converse(self):
         """Keep listening for follow-ups without the wake word, until a silence, "that's all", or something
         starts playing (its sound would be heard as commands)."""
@@ -1190,20 +1494,22 @@ class Assistant:
             if self.media_playing or actions.something_playing():
                 log.info("Something is playing: no follow-up listening (its voices would be heard as commands)")
                 break
-            # Don't listen to Triton itself while it talks, but "Hey Triton" cuts it short
-            if self.speaker and self._watch_for_wake(lambda: self.speaker.speaking, timeout=60):
+            # While Triton talks: "Hey Triton" cuts it short, and (with echo cancellation) so does just talking over it
+            cut = self._while_talking()
+            if cut == "wake":
                 log.info("Cut off while talking")
                 self._say(random.choice(WAKE_REPLIES or ["Yes?"]), wait=True)
-            time.sleep(0.3)
-            self._clear_audio()
+            if cut != "barge":
+                # Listen on from right after its voice: what you said meanwhile is kept, not thrown away
+                self._after_own_voice()
             self.overlay.show("Listening…")
-            heard, heard_free = self._listen_for_command(window=FOLLOW_UP_SEC)
+            heard, heard_free, decided = self._hear_and_decide(window=FOLLOW_UP_SEC, skip=0)
             if not (heard or heard_free):
                 break
             log.info("Follow-up: %r (free: %r)", heard, heard_free)
             events.emit("heard", text=heard_free or heard, grammar=heard, by="voice (follow-up)")
             self.overlay.set_level(0)
-            going_on = self._do(heard, heard_free)
+            going_on = self._do(heard, heard_free, decided=decided)
             self._remember(heard_free or heard)
             misses = misses + 1 if self.missed else 0
             if not going_on or misses >= 2:
@@ -1229,11 +1535,9 @@ class Assistant:
             self.local_history = deque(maxlen=3)
         return self.local_history
 
-    def _do(self, heard, heard_free="", asked=False):
-        """Carry out what was heard, step by step, and say how it went in the bubble. Returns whether
-        the conversation can go on (False after "never mind", or once something starts playing)."""
-        self.last_reply = ""
-        self.missed = False
+    def _decide(self, heard, heard_free):
+        """What to do with what was heard: (heard, heard_free, kind, payload, who, seconds). May run in its own thread
+        while the mic keeps listening (_Decision)."""
         said = heard_free or heard
         t0 = time.monotonic()
         kind, payload, who = self._understand(heard, heard_free)
@@ -1242,9 +1546,19 @@ class Assistant:
             # and try once more, before asking you to repeat yourself
             again = self._second_listen(said)
             if again:
-                heard = heard_free = said = again
+                heard = heard_free = again
                 kind, payload, who = self._understand(again, again)
-        events.emit("decided", who=who, what=kind, payload=payload, sec=round(time.monotonic() - t0, 2))
+        return heard, heard_free, kind, payload, who, time.monotonic() - t0
+
+    def _do(self, heard, heard_free="", asked=False, decided=None):
+        """Carry out what was heard, step by step, and say how it went in the bubble. Returns whether
+        the conversation can go on (False after "never mind", or once something starts playing).
+        decided: _decide()'s answer when it was worked out already, while listening (_hear_and_decide)."""
+        self.last_reply = ""
+        self.missed = False
+        heard, heard_free, kind, payload, who, sec = decided or self._decide(heard, heard_free)
+        said = heard_free or heard
+        events.emit("decided", who=who, what=kind, payload=payload, sec=round(sec, 2))
         ask_after = None
         if kind == "partial":                  # do the clear part, then ask about the rest (see the end)
             (payload, ask_after), kind = payload, "act"
