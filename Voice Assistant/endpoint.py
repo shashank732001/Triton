@@ -37,15 +37,20 @@ MAX_GAIN = 8.0
 # recogniser (Vosk) is still producing new words
 LOUDER_THAN_ROOM = 2.5
 MIN_RMS = 60
-END_SILENCE_SEC = 0.8        # pauses inside a sentence measured on real clips: up to ~0.4 s
-DANGLING_SILENCE_SEC = 1.8   # "open ...", "set the volume to ...": thinking of the rest
+# Shorter than before (0.8 / 1.3 / 1.8 s), as in Max (500 ms, 300 ms for a finished request); if a pause is still taken
+# for the end, the mic keeps listening while Triton thinks and what you say next is joined on (assistant.py,
+# "continuing after a pause"). bench/listen_replay.py on your 26 recorded commands: 0.55 s cut 2 long sentences at a
+# pause ("Open our Netflix ... and select Shashank"), 0.65 s cut none; median response 0.68 -> 0.56 s.
+END_SILENCE_SEC = 0.65       # pauses inside a sentence: mostly up to ~0.4 s, a few up to ~0.6 s
+COMPLETE_SILENCE_SEC = 0.4   # the words so far are already a whole command (complete(text) says so)
+DANGLING_SILENCE_SEC = 1.4   # "open ...", "set the volume to ...": thinking of the rest
 WAKE_TAIL_SEC = 0.4
 MAX_COMMAND_SEC = 12.0
 PAD_BEFORE_SEC = 1.0         # audio kept before the speech for Whisper: generous, because a soft first word ("That's
                              # all") can score low, and cutting it costs far more than a little silence
 PAD_AFTER_SEC = 0.8
 SHORT_SPEECH_SEC = 0.8       # so far only a short burst ("Hey Triton", "uh"): wait longer before calling it the end
-SHORT_SILENCE_SEC = 1.3
+SHORT_SILENCE_SEC = 0.9
 
 # A sentence ending in one of these isn't finished ("open ... youtube", "set the volume to ... 30"). Not "up" or
 # "stop": "turn it up" and a bare "stop" are whole commands and shouldn't wait.
@@ -56,10 +61,13 @@ DANGLING = {"open", "close", "to", "the", "a", "an", "and", "for", "search", "pl
 
 
 class Endpointer:
-    def __init__(self, start_window=6.0, max_sec=MAX_COMMAND_SEC, skip_sec=WAKE_TAIL_SEC, only_wake=None):
+    def __init__(self, start_window=6.0, max_sec=MAX_COMMAND_SEC, skip_sec=WAKE_TAIL_SEC, only_wake=None, complete=None):
         # only_wake(text): True when the words so far are just the wake phrase ("hey triton", "hair triter"): then a
         # pause is the gap before the command, not the end of it
         self.only_wake = only_wake or (lambda text: False)
+        # complete(text): True when the words so far already make a whole command ("turn it up", "open netflix"):
+        # then COMPLETE_SILENCE_SEC is enough
+        self.complete = complete or (lambda text: False)
         self.vad = VAD()
         self.start_window, self.max_sec, self.skip = start_window, max_sec, skip_sec
         self.n = 0                   # frames pushed
@@ -121,6 +129,8 @@ class Endpointer:
                 need = SHORT_SILENCE_SEC
             if (words and words[-1] in DANGLING) or (words and self.only_wake(text_so_far)):
                 need = DANGLING_SILENCE_SEC
+            elif words and self.complete(text_so_far):
+                need = COMPLETE_SILENCE_SEC
             if (self.n - 1 - self.last) * FRAME / RATE >= need:
                 self.reason = "end"
         return self.reason
